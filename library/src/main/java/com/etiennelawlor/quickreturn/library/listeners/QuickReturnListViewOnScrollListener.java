@@ -7,196 +7,66 @@ import android.widget.AbsListView;
 import com.etiennelawlor.quickreturn.library.enums.QuickReturnType;
 import com.etiennelawlor.quickreturn.library.utils.QuickReturnUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by etiennelawlor on 7/10/14.
  */
-public class QuickReturnListViewOnScrollListener implements AbsListView.OnScrollListener {
+public class QuickReturnListViewOnScrollListener extends AbsQuickReturnOnScrollListener implements AbsListView.OnScrollListener {
 
     // region Member Variables
-    private int mMinFooterTranslation;
-    private int mMinHeaderTranslation;
     private int mPrevScrollY = 0;
-    private int mHeaderDiffTotal = 0;
-    private int mFooterDiffTotal = 0;
-    private View mHeader;
-    private View mFooter;
-    private QuickReturnType mQuickReturnType;
     private boolean mCanSlideInIdleScrollState = false;
-
-    private List<AbsListView.OnScrollListener> mExtraOnScrollListenerList = new ArrayList<AbsListView.OnScrollListener>();
     // endregion
 
     // region Constructors
-    public QuickReturnListViewOnScrollListener(QuickReturnType quickReturnType, View headerView, int headerTranslation, View footerView, int footerTranslation){
-        mQuickReturnType = quickReturnType;
-        mHeader =  headerView;
-        mMinHeaderTranslation = headerTranslation;
-        mFooter =  footerView;
-        mMinFooterTranslation = footerTranslation;
+    public QuickReturnListViewOnScrollListener(QuickReturnType quickReturnType, View headerView, int headerTranslation, View footerView, int footerTranslation) {
+        super(quickReturnType, headerView, headerTranslation, footerView, footerTranslation);
     }
     // endregion
 
     @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-//        Log.d(getClass().getSimpleName(), "onScrollStateChanged() : scrollState - "+scrollState);
+    public void onScrollStateChanged(AbsListView listView, int scrollState) {
         // apply another list' s on scroll listener
-        for (AbsListView.OnScrollListener listener : mExtraOnScrollListenerList) {
-          listener.onScrollStateChanged(view, scrollState);
-        }
-        if(scrollState == SCROLL_STATE_IDLE && mCanSlideInIdleScrollState){
+        fireExtraOnScrollStateChangedListeners(listView, scrollState);
 
-            int midHeader = -mMinHeaderTranslation/2;
-            int midFooter = mMinFooterTranslation/2;
-
+        if (scrollState == SCROLL_STATE_IDLE && mCanSlideInIdleScrollState) {
+            boolean fall = false;
+            // TODO: if scrollY == 0 always show header/footer
             switch (mQuickReturnType) {
-                case HEADER:
-                    if (-mHeaderDiffTotal > 0 && -mHeaderDiffTotal < midHeader) {
-                        ObjectAnimator anim = ObjectAnimator.ofFloat(mHeader, "translationY", mHeader.getTranslationY(), 0);
-                        anim.setDuration(100);
-                        anim.start();
-                        mHeaderDiffTotal = 0;
-                    } else if (-mHeaderDiffTotal < -mMinHeaderTranslation && -mHeaderDiffTotal >= midHeader) {
-                        ObjectAnimator anim = ObjectAnimator.ofFloat(mHeader, "translationY", mHeader.getTranslationY(), mMinHeaderTranslation);
-                        anim.setDuration(100);
-                        anim.start();
-                        mHeaderDiffTotal = mMinHeaderTranslation;
-                    }
-                    break;
-                case FOOTER:
-                    if (-mFooterDiffTotal > 0 && -mFooterDiffTotal < midFooter) { // slide up
-                        ObjectAnimator anim = ObjectAnimator.ofFloat(mFooter, "translationY", mFooter.getTranslationY(), 0);
-                        anim.setDuration(100);
-                        anim.start();
-                        mFooterDiffTotal = 0;
-                    } else if (-mFooterDiffTotal < mMinFooterTranslation && -mFooterDiffTotal >= midFooter) { // slide down
-                        ObjectAnimator anim = ObjectAnimator.ofFloat(mFooter, "translationY", mFooter.getTranslationY(), mMinFooterTranslation);
-                        anim.setDuration(100);
-                        anim.start();
-                        mFooterDiffTotal = -mMinFooterTranslation;
-                    }
-                    break;
                 case BOTH:
-                    if (-mHeaderDiffTotal > 0 && -mHeaderDiffTotal < midHeader) {
-                        ObjectAnimator anim = ObjectAnimator.ofFloat(mHeader, "translationY", mHeader.getTranslationY(), 0);
-                        anim.setDuration(100);
-                        anim.start();
-                        mHeaderDiffTotal = 0;
-                    } else if (-mHeaderDiffTotal < -mMinHeaderTranslation && -mHeaderDiffTotal >= midHeader) {
-                        ObjectAnimator anim = ObjectAnimator.ofFloat(mHeader, "translationY", mHeader.getTranslationY(), mMinHeaderTranslation);
-                        anim.setDuration(100);
-                        anim.start();
-                        mHeaderDiffTotal = mMinHeaderTranslation;
-                    }
-
-                    if (-mFooterDiffTotal > 0 && -mFooterDiffTotal < midFooter) { // slide up
-                        ObjectAnimator anim = ObjectAnimator.ofFloat(mFooter, "translationY", mFooter.getTranslationY(), 0);
-                        anim.setDuration(100);
-                        anim.start();
-                        mFooterDiffTotal = 0;
-                    } else if (-mFooterDiffTotal < mMinFooterTranslation && -mFooterDiffTotal >= midFooter) { // slide down
-                        ObjectAnimator anim = ObjectAnimator.ofFloat(mFooter, "translationY", mFooter.getTranslationY(), mMinFooterTranslation);
-                        anim.setDuration(100);
-                        anim.start();
-                        mFooterDiffTotal = -mMinFooterTranslation;
-                    }
-                    break;
                 case TWITTER:
-                    if (-mHeaderDiffTotal > 0 && -mHeaderDiffTotal < midHeader) {
-                        ObjectAnimator anim = ObjectAnimator.ofFloat(mHeader, "translationY", mHeader.getTranslationY(), 0);
-                        anim.setDuration(100);
-                        anim.start();
-                        mHeaderDiffTotal = 0;
-                    } else if (-mHeaderDiffTotal < -mMinHeaderTranslation && -mHeaderDiffTotal >= midHeader) {
-                        ObjectAnimator anim = ObjectAnimator.ofFloat(mHeader, "translationY", mHeader.getTranslationY(), mMinHeaderTranslation);
-                        anim.setDuration(100);
-                        anim.start();
-                        mHeaderDiffTotal = mMinHeaderTranslation;
-                    }
-
-                    if (-mFooterDiffTotal > 0 && -mFooterDiffTotal < midFooter) { // slide up
-                        ObjectAnimator anim = ObjectAnimator.ofFloat(mFooter, "translationY", mFooter.getTranslationY(), 0);
-                        anim.setDuration(100);
-                        anim.start();
-                        mFooterDiffTotal = 0;
-                    } else if (-mFooterDiffTotal < mMinFooterTranslation && -mFooterDiffTotal >= midFooter) { // slide down
-                        ObjectAnimator anim = ObjectAnimator.ofFloat(mFooter, "translationY", mFooter.getTranslationY(), mMinFooterTranslation);
-                        anim.setDuration(100);
-                        anim.start();
-                        mFooterDiffTotal = -mMinFooterTranslation;
-                    }
-                    break;
-            }
-
-        }
-    }
-
-    @Override
-    public void onScroll(AbsListView listview, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        // apply extra on scroll listener
-        for (AbsListView.OnScrollListener listener : mExtraOnScrollListenerList) {
-          listener.onScroll(listview, firstVisibleItem, visibleItemCount, totalItemCount);
-        }
-        int scrollY = QuickReturnUtils.getScrollY(listview);
-        int diff = mPrevScrollY - scrollY;
-
-//        Log.d(getClass().getSimpleName(), "onScroll() : scrollY - "+scrollY);
-//        Log.d(getClass().getSimpleName(), "onScroll() : diff - "+diff);
-//        Log.d(getClass().getSimpleName(), "onScroll() : mMinHeaderTranslation - "+mMinHeaderTranslation);
-//        Log.d(getClass().getSimpleName(), "onScroll() : mMinFooterTranslation - "+mMinFooterTranslation);
-
-        if(diff != 0){
-            switch (mQuickReturnType){
+                    fall = true;
                 case HEADER:
-                    if(diff < 0){ // scrolling down
-                        mHeaderDiffTotal = Math.max(mHeaderDiffTotal + diff, mMinHeaderTranslation);
-                    } else { // scrolling up
-                        mHeaderDiffTotal = Math.min(Math.max(mHeaderDiffTotal + diff, mMinHeaderTranslation), 0);
+                    if (-mHeaderDiffTotal > 0 && -mHeaderDiffTotal < mMidHeader) {
+                        animateSnap(mHeader, 0);
+                        mHeaderDiffTotal = 0;
+                    } else if (-mHeaderDiffTotal < -mMinHeaderTranslation && -mHeaderDiffTotal >= mMidHeader) {
+                        animateSnap(mHeader, mMinHeaderTranslation);
+                        mHeaderDiffTotal = mMinHeaderTranslation;
                     }
-
-                    mHeader.setTranslationY(mHeaderDiffTotal);
-                    break;
+                    if (!fall) break;
                 case FOOTER:
-                    if(diff < 0){ // scrolling down
-                        mFooterDiffTotal = Math.max(mFooterDiffTotal + diff, -mMinFooterTranslation);
-                    } else { // scrolling up
-                        mFooterDiffTotal = Math.min(Math.max(mFooterDiffTotal + diff, -mMinFooterTranslation), 0);
+                    if (-mFooterDiffTotal > 0 && -mFooterDiffTotal < mMidFooter) { // slide up
+                        animateSnap(mFooter, 0);
+                        mFooterDiffTotal = 0;
+                    } else if (-mFooterDiffTotal < mMinFooterTranslation && -mFooterDiffTotal >= mMidFooter) { // slide down
+                        animateSnap(mFooter, mMinFooterTranslation);
+                        mFooterDiffTotal = -mMinFooterTranslation;
                     }
-
-                    mFooter.setTranslationY(-mFooterDiffTotal);
                     break;
-                case BOTH:
-                    if(diff < 0){ // scrolling down
-                        mHeaderDiffTotal = Math.max(mHeaderDiffTotal + diff, mMinHeaderTranslation);
-                        mFooterDiffTotal = Math.max(mFooterDiffTotal + diff, -mMinFooterTranslation);
-                    } else { // scrolling up
-                        mHeaderDiffTotal = Math.min(Math.max(mHeaderDiffTotal + diff, mMinHeaderTranslation), 0);
-                        mFooterDiffTotal = Math.min(Math.max(mFooterDiffTotal + diff, -mMinFooterTranslation), 0);
-                    }
-
-                    mHeader.setTranslationY(mHeaderDiffTotal);
-                    mFooter.setTranslationY(-mFooterDiffTotal);
-                    break;
-                case TWITTER:
-                    if(diff < 0){ // scrolling down
-                        if(scrollY > -mMinHeaderTranslation)
-                            mHeaderDiffTotal = Math.max(mHeaderDiffTotal + diff, mMinHeaderTranslation);
-
-                        if(scrollY > mMinFooterTranslation)
-                            mFooterDiffTotal = Math.max(mFooterDiffTotal + diff, -mMinFooterTranslation);
-                    } else { // scrolling up
-                        mHeaderDiffTotal = Math.min(Math.max(mHeaderDiffTotal + diff, mMinHeaderTranslation), 0);
-                        mFooterDiffTotal = Math.min(Math.max(mFooterDiffTotal + diff, -mMinFooterTranslation), 0);
-                    }
-
-                    mHeader.setTranslationY(mHeaderDiffTotal);
-                    mFooter.setTranslationY(-mFooterDiffTotal);
                 default:
                     break;
             }
         }
+    }
+
+    @Override
+    public void onScroll(AbsListView listView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        // apply extra on scroll listener
+        fireExtraOnScrollListeners(listView, firstVisibleItem, visibleItemCount, totalItemCount);
+
+        int scrollY = QuickReturnUtils.getScrollY(listView);
+        int diff = mPrevScrollY - scrollY;
+        onScroll(scrollY, diff);
 
         mPrevScrollY = scrollY;
     }
@@ -205,7 +75,9 @@ public class QuickReturnListViewOnScrollListener implements AbsListView.OnScroll
         mCanSlideInIdleScrollState = canSlideInIdleScrollState;
     }
 
-    public void registerExtraOnScrollListener(AbsListView.OnScrollListener listener) {
-        mExtraOnScrollListenerList.add(listener);
+    private void animateSnap(View view, int translation) {
+        ObjectAnimator anim = ObjectAnimator.ofFloat(view, "translationY", view.getTranslationY(), translation);
+        anim.setDuration(100);
+        anim.start();
     }
 }
