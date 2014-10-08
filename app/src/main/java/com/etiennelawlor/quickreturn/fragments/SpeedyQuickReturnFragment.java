@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import com.etiennelawlor.quickreturn.R;
 import com.etiennelawlor.quickreturn.library.enums.QuickReturnType;
-import com.etiennelawlor.quickreturn.library.listeners.SpeedyQuickReturnScrollViewOnScrollChangedListener;
+import com.etiennelawlor.quickreturn.library.listeners.SpeedyQuickReturnOnScrollListener;
 import com.etiennelawlor.quickreturn.library.views.NotifyingScrollView;
 
 import butterknife.ButterKnife;
@@ -69,18 +69,18 @@ public class SpeedyQuickReturnFragment extends Fragment {
         switch (mQuickReturnType){
             case HEADER:
                 mQuickReturnHeaderTextView.setVisibility(View.VISIBLE);
-                mNotifyingScrollView.setOnScrollChangedListener(new SpeedyQuickReturnScrollViewOnScrollChangedListener(getActivity(),
+                mNotifyingScrollView.setOnScrollListener(new SpeedyQuickReturnOnScrollListener(getActivity(),
                         QuickReturnType.HEADER, mQuickReturnHeaderTextView, null));
                 break;
             case FOOTER:
                 mQuickReturnFooterTextView.setVisibility(View.VISIBLE);
-                mNotifyingScrollView.setOnScrollChangedListener(new SpeedyQuickReturnScrollViewOnScrollChangedListener(getActivity(),
+                mNotifyingScrollView.setOnScrollListener(new SpeedyQuickReturnOnScrollListener(getActivity(),
                         QuickReturnType.FOOTER, null, mQuickReturnFooterTextView));
                 break;
             case BOTH:
                 mQuickReturnHeaderTextView.setVisibility(View.VISIBLE);
                 mQuickReturnFooterTextView.setVisibility(View.VISIBLE);
-                mNotifyingScrollView.setOnScrollChangedListener(new SpeedyQuickReturnScrollViewOnScrollChangedListener(getActivity(),
+                mNotifyingScrollView.setOnScrollListener(new SpeedyQuickReturnOnScrollListener(getActivity(),
                         QuickReturnType.BOTH, mQuickReturnHeaderTextView, mQuickReturnFooterTextView));
                 break;
         }

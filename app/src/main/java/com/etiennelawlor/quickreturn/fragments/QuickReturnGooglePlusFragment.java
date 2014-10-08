@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.etiennelawlor.quickreturn.R;
 import com.etiennelawlor.quickreturn.adapters.GooglePlusAdapter;
 import com.etiennelawlor.quickreturn.library.enums.QuickReturnType;
-import com.etiennelawlor.quickreturn.library.listeners.SpeedyQuickReturnListViewOnScrollListener;
+import com.etiennelawlor.quickreturn.library.listeners.SpeedyQuickReturnOnScrollListener;
 import com.etiennelawlor.quickreturn.models.GooglePlusPost;
 
 import java.util.ArrayList;
@@ -152,7 +152,7 @@ public class QuickReturnGooglePlusFragment extends ListFragment {
         mQuickReturnFooterImageView.setTag(R.id.scroll_threshold_key, 4);
         footerViews.add(mQuickReturnFooterImageView);
 
-        SpeedyQuickReturnListViewOnScrollListener scrollListener = new SpeedyQuickReturnListViewOnScrollListener(getActivity(), QuickReturnType.GOOGLE_PLUS, null, footerViews);
+        SpeedyQuickReturnOnScrollListener scrollListener = new SpeedyQuickReturnOnScrollListener(getActivity(), QuickReturnType.GOOGLE_PLUS, null, footerViews);
         scrollListener.setSlideHeaderUpAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.slide_header_up));
         scrollListener.setSlideHeaderDownAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.slide_header_down));
         scrollListener.setSlideFooterUpAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.slide_footer_up));

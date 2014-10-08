@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import com.etiennelawlor.quickreturn.R;
 import com.etiennelawlor.quickreturn.library.enums.QuickReturnType;
-import com.etiennelawlor.quickreturn.library.listeners.QuickReturnScrollViewOnScrollChangedListener;
+import com.etiennelawlor.quickreturn.library.listeners.QuickReturnOnScrollListener;
 import com.etiennelawlor.quickreturn.library.views.NotifyingScrollView;
 
 import butterknife.ButterKnife;
@@ -75,18 +75,18 @@ public class QuickReturnFragment extends Fragment {
         switch (mQuickReturnType){
             case HEADER:
                 mQuickReturnHeaderTextView.setVisibility(View.VISIBLE);
-                mNotifyingScrollView.setOnScrollChangedListener(new QuickReturnScrollViewOnScrollChangedListener(QuickReturnType.HEADER,
+                mNotifyingScrollView.setOnScrollListener(new QuickReturnOnScrollListener(QuickReturnType.HEADER,
                         mQuickReturnHeaderTextView, headerTranslation, null, 0));
                 break;
             case FOOTER:
                 mQuickReturnFooterTextView.setVisibility(View.VISIBLE);
-                mNotifyingScrollView.setOnScrollChangedListener(new QuickReturnScrollViewOnScrollChangedListener(QuickReturnType.FOOTER,
+                mNotifyingScrollView.setOnScrollListener(new QuickReturnOnScrollListener(QuickReturnType.FOOTER,
                         null, 0, mQuickReturnFooterTextView, footerTranslation));
                 break;
             case BOTH:
                 mQuickReturnHeaderTextView.setVisibility(View.VISIBLE);
                 mQuickReturnFooterTextView.setVisibility(View.VISIBLE);
-                mNotifyingScrollView.setOnScrollChangedListener(new QuickReturnScrollViewOnScrollChangedListener(QuickReturnType.BOTH,
+                mNotifyingScrollView.setOnScrollListener(new QuickReturnOnScrollListener(QuickReturnType.BOTH,
                         mQuickReturnHeaderTextView, headerTranslation, mQuickReturnFooterTextView, footerTranslation));
                 break;
         }

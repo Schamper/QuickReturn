@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.etiennelawlor.quickreturn.R;
 import com.etiennelawlor.quickreturn.library.enums.QuickReturnType;
-import com.etiennelawlor.quickreturn.library.listeners.QuickReturnListViewOnScrollListener;
+import com.etiennelawlor.quickreturn.library.listeners.QuickReturnOnScrollListener;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -67,7 +67,7 @@ public class QuickReturnFooterListFragment3 extends ListFragment {
 
         int footerHeight = getActivity().getResources().getDimensionPixelSize(R.dimen.footer_height);
 
-        QuickReturnListViewOnScrollListener scrollListener = new QuickReturnListViewOnScrollListener(QuickReturnType.FOOTER, null, 0, mQuickReturnTextView, footerHeight);
+        QuickReturnOnScrollListener scrollListener = new QuickReturnOnScrollListener(QuickReturnType.FOOTER, null, 0, mQuickReturnTextView, footerHeight);
         scrollListener.setCanSlideInIdleScrollState(true);
         mListView.setOnScrollListener(scrollListener);
     }

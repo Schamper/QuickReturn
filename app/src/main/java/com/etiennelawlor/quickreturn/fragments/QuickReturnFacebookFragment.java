@@ -12,7 +12,7 @@ import android.widget.TextView;
 import com.etiennelawlor.quickreturn.R;
 import com.etiennelawlor.quickreturn.adapters.FacebookAdapter;
 import com.etiennelawlor.quickreturn.library.enums.QuickReturnType;
-import com.etiennelawlor.quickreturn.library.listeners.QuickReturnListViewOnScrollListener;
+import com.etiennelawlor.quickreturn.library.listeners.QuickReturnOnScrollListener;
 import com.etiennelawlor.quickreturn.models.FacebookPost;
 
 import java.util.ArrayList;
@@ -111,7 +111,7 @@ public class QuickReturnFacebookFragment extends ListFragment {
         int footerTranslation = -footerHeight;
 
 
-        QuickReturnListViewOnScrollListener scrollListener = new QuickReturnListViewOnScrollListener(QuickReturnType.BOTH,
+        QuickReturnOnScrollListener scrollListener = new QuickReturnOnScrollListener(QuickReturnType.BOTH,
                 mQuickReturnHeaderTextView, headerTranslation, mQuickReturnFooterLinearLayout, -footerTranslation);
         scrollListener.setCanSlideInIdleScrollState(true);
         mListView.setOnScrollListener(scrollListener);

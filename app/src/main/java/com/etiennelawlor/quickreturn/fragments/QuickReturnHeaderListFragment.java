@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.etiennelawlor.quickreturn.R;
 import com.etiennelawlor.quickreturn.library.enums.QuickReturnType;
-import com.etiennelawlor.quickreturn.library.listeners.QuickReturnListViewOnScrollListener;
+import com.etiennelawlor.quickreturn.library.listeners.QuickReturnOnScrollListener;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -66,7 +66,7 @@ public class QuickReturnHeaderListFragment extends ListFragment {
         mListView.setAdapter(adapter);
 
         int headerHeight = getActivity().getResources().getDimensionPixelSize(R.dimen.header_height2);
-        mListView.setOnScrollListener(new QuickReturnListViewOnScrollListener(QuickReturnType.HEADER, mQuickReturnTextView, -headerHeight, null, 0));
+        mListView.setOnScrollListener(new QuickReturnOnScrollListener(QuickReturnType.HEADER, mQuickReturnTextView, -headerHeight, null, 0));
     }
 
     @Override

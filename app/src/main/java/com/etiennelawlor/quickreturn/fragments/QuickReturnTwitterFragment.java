@@ -3,7 +3,6 @@ package com.etiennelawlor.quickreturn.fragments;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +11,11 @@ import android.widget.ListView;
 
 import com.etiennelawlor.quickreturn.R;
 import com.etiennelawlor.quickreturn.adapters.TwitterAdapter;
-import com.etiennelawlor.quickreturn.library.enums.QuickReturnType;
 import com.etiennelawlor.quickreturn.interfaces.QuickReturnInterface;
-import com.etiennelawlor.quickreturn.library.listeners.QuickReturnListViewOnScrollListener;
-import com.etiennelawlor.quickreturn.models.Tweet;
+import com.etiennelawlor.quickreturn.library.enums.QuickReturnType;
+import com.etiennelawlor.quickreturn.library.listeners.QuickReturnOnScrollListener;
 import com.etiennelawlor.quickreturn.library.utils.QuickReturnUtils;
+import com.etiennelawlor.quickreturn.models.Tweet;
 
 import java.util.ArrayList;
 
@@ -111,7 +110,7 @@ public class QuickReturnTwitterFragment extends ListFragment {
         int headerTranslation = -headerHeight + indicatorHeight;
         int footerTranslation = -footerHeight + indicatorHeight;
 
-        QuickReturnListViewOnScrollListener scrollListener = new QuickReturnListViewOnScrollListener(QuickReturnType.TWITTER,
+        final QuickReturnOnScrollListener scrollListener = new QuickReturnOnScrollListener(QuickReturnType.TWITTER,
                 mCoordinator.getTabs(), headerTranslation, mQuickReturnFooterLinearLayout, -footerTranslation);
         scrollListener.setCanSlideInIdleScrollState(true);
         mListView.setOnScrollListener(scrollListener);
