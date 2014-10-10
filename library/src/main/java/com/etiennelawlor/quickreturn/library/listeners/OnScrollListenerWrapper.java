@@ -19,6 +19,7 @@ public abstract class OnScrollListenerWrapper implements AbsListView.OnScrollLis
     private List<NotifyingScrollView.OnScrollChangedListener> mExtraScrollViewOnScrollListenerList =
             new ArrayList<NotifyingScrollView.OnScrollChangedListener>();
     private int mPrevScrollY = 0;
+    private int mLastScrollState = 0;
 
     protected abstract void handleOnScrollChanged(int oldY, int newY);
     protected abstract void handleOnScrollStateChanged(int scrollState);
@@ -39,13 +40,18 @@ public abstract class OnScrollListenerWrapper implements AbsListView.OnScrollLis
     public void onScrollStateChanged(AbsListView listView, int scrollState) {
         fireExtraOnScrollStateChangedListeners(listView, scrollState);
         handleOnScrollStateChanged(scrollState);
+        mLastScrollState = scrollState;
     }
 
     @Override
     public void onScroll(AbsListView listView, int i, int i2, int i3) {
         fireExtraOnScrollListeners(listView, i, i2, i3);
         int scrollY = QuickReturnUtils.getScrollY(listView);
-        handleOnScrollChanged(mPrevScrollY, scrollY);
+        // Prevent action when a scroll position is being restored
+        // Pretty hacky method, but it works
+        if (mLastScrollState != SCROLL_STATE_IDLE) {
+            handleOnScrollChanged(mPrevScrollY, scrollY);
+        }
         mPrevScrollY = scrollY;
     }
 
