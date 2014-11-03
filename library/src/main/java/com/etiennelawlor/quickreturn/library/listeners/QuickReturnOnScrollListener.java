@@ -24,6 +24,8 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
     private boolean mCanSlideInIdleScrollState = false;
     // endregion
 
+
+    // region Constructor
     public QuickReturnOnScrollListener(QuickReturnType quickReturnType, View headerView, int headerTranslation, View footerView, int footerTranslation) {
         mQuickReturnType = quickReturnType;
         mHeader =  headerView;
@@ -33,7 +35,9 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
         mMidFooter = footerTranslation/2;
         mMinFooterTranslation = footerTranslation;
     }
+    // endregion
 
+    // region Handlers
     protected void handleOnScrollChanged(int oldY, int newY) {
         int diff = oldY - newY;
         if (diff != 0) {
@@ -76,7 +80,9 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
             }
         }
     }
-    
+    // endregion
+
+    // region Utility Methods
     public boolean isHeaderHidden() {
         return mHeaderDiffTotal == mMinHeaderTranslation;
     }
@@ -104,11 +110,15 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
         animateView(mFooter, mMinFooterTranslation);
         mFooterDiffTotal = mMinFooterTranslation;
     }
+    // endregion
 
+    // region Settings
     public void setCanSlideInIdleScrollState(boolean canSlideInIdleScrollState){
         mCanSlideInIdleScrollState = canSlideInIdleScrollState;
     }
+    // endregion
 
+    // region Logic
     private int snapView(View view, int diffTotal, int midView, int translation, boolean isFooter) {
         if (-diffTotal > 0 && -diffTotal < midView) {
             animateView(view, 0);
@@ -140,4 +150,5 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
         anim.setDuration(100);
         anim.start();
     }
+    // endregion
 }

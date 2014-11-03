@@ -35,7 +35,7 @@ android {
         abortOnError false
         disable 'InvalidPackage'
     }
-    android.aaptOptions.useAaptPngCruncher = true
+
     productFlavors {
     }
 }
