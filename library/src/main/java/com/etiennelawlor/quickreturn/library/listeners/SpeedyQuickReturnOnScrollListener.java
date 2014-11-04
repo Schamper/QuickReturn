@@ -40,8 +40,7 @@ public class SpeedyQuickReturnOnScrollListener extends QuickReturnOnScrollListen
     }
 
     @Override
-    protected void handleOnScrollChanged(int oldY, int newY) {
-        int diff = oldY - newY;
+    protected void handleOnScrollChanged(int diff, int scrollY) {
         boolean fall = false;
         switch (mQuickReturnType) {
             case BOTH:

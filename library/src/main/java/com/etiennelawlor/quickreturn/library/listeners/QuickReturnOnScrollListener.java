@@ -11,49 +11,50 @@ import com.etiennelawlor.quickreturn.library.enums.QuickReturnType;
 public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
 
     // region Member Variables
+    private int mCurrentHeaderTranslation = 0;
+    private int mCurrentFooterTranslation = 0;
     private int mMinFooterTranslation;
     private int mMinHeaderTranslation;
-    private int mHeaderDiffTotal = 0;
-    private int mFooterDiffTotal = 0;
     private int mMidHeader;
     private int mMidFooter;
     protected View mHeader;
     protected View mFooter;
 
     protected QuickReturnType mQuickReturnType;
+
     private boolean mCanSlideInIdleScrollState = false;
+    private int mDelayOffset = 0;
     // endregion
 
 
     // region Constructor
     public QuickReturnOnScrollListener(QuickReturnType quickReturnType, View headerView, int headerTranslation, View footerView, int footerTranslation) {
         mQuickReturnType = quickReturnType;
+
         mHeader =  headerView;
-        mMidHeader = -headerTranslation/2;
+        mMidHeader = -headerTranslation / 2;
         mMinHeaderTranslation = headerTranslation;
+
         mFooter =  footerView;
-        mMidFooter = footerTranslation/2;
+        mMidFooter = footerTranslation / 2;
         mMinFooterTranslation = footerTranslation;
     }
     // endregion
 
     // region Handlers
-    protected void handleOnScrollChanged(int oldY, int newY) {
-        int diff = oldY - newY;
+    protected void handleOnScrollChanged(int diff, int scrollY) {
         if (diff != 0) {
-            boolean fall = false, isTwitter = false;
+            boolean fall = false;
             switch (mQuickReturnType) {
-                case TWITTER:
-                    isTwitter = true;
                 case BOTH:
                     fall = true;
                 case HEADER:
-                    mHeaderDiffTotal = calculateDiffTotal(diff, mHeaderDiffTotal, mMinHeaderTranslation, isTwitter, newY);
-                    mHeader.setTranslationY(mHeaderDiffTotal);
+                    mCurrentHeaderTranslation = calculateTranslation(diff, scrollY, mCurrentHeaderTranslation, mMinHeaderTranslation);
+                    mHeader.setTranslationY(mCurrentHeaderTranslation);
                     if (!fall) break;
                 case FOOTER:
-                    mFooterDiffTotal = calculateDiffTotal(diff, mFooterDiffTotal, -mMinFooterTranslation, isTwitter, newY);
-                    mFooter.setTranslationY(-mFooterDiffTotal);
+                    mCurrentFooterTranslation = calculateTranslation(diff, scrollY, mCurrentFooterTranslation, -mMinFooterTranslation);
+                    mFooter.setTranslationY(-mCurrentFooterTranslation);
                     break;
                 default:
                     break;
@@ -61,19 +62,17 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
         }
     }
 
-    protected void handleOnScrollStateChanged(int scrollState) {
-        if (scrollState == SCROLL_STATE_IDLE && mCanSlideInIdleScrollState) {
+    protected void handleOnScrollStateChanged(int scrollState, int scrollY) {
+        if (mCanSlideInIdleScrollState && scrollState == SCROLL_STATE_IDLE) {
             boolean fall = false;
-            // TODO: if scrollY == 0 always show header/footer
             switch (mQuickReturnType) {
                 case BOTH:
-                case TWITTER:
                     fall = true;
                 case HEADER:
-                    mHeaderDiffTotal = snapView(mHeader, mHeaderDiffTotal, mMidHeader, mMinHeaderTranslation, false);
+                    mCurrentHeaderTranslation = snapView(mHeader, mCurrentHeaderTranslation, mMidHeader, scrollY, mMinHeaderTranslation, false);
                     if (!fall) break;
                 case FOOTER:
-                    mFooterDiffTotal = snapView(mFooter, mFooterDiffTotal, mMidFooter, mMinFooterTranslation, true);
+                    mCurrentFooterTranslation = snapView(mFooter, mCurrentFooterTranslation, mMidFooter, scrollY, mMinFooterTranslation, true);
                     break;
                 default:
                     break;
@@ -84,31 +83,31 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
 
     // region Utility Methods
     public boolean isHeaderHidden() {
-        return mHeaderDiffTotal == mMinHeaderTranslation;
+        return mCurrentHeaderTranslation == mMinHeaderTranslation;
     }
-    
+
     public boolean isFooterHidden() {
-        return mFooterDiffTotal == mMinFooterTranslation;
+        return mCurrentFooterTranslation == mMinFooterTranslation;
     }
-    
+
     public void showHeader() {
         animateView(mHeader, 0);
-        mHeaderDiffTotal = 0;
+        mCurrentHeaderTranslation = 0;
     }
-    
+
     public void hideHeader() {
         animateView(mHeader, mMinHeaderTranslation);
-        mHeaderDiffTotal = mMinHeaderTranslation;
+        mCurrentHeaderTranslation = mMinHeaderTranslation;
     }
-    
+
     public void showFooter() {
         animateView(mFooter, 0);
-        mFooterDiffTotal = 0;
+        mCurrentFooterTranslation = 0;
     }
-    
+
     public void hideFooter() {
         animateView(mFooter, mMinFooterTranslation);
-        mFooterDiffTotal = mMinFooterTranslation;
+        mCurrentFooterTranslation = mMinFooterTranslation;
     }
     // endregion
 
@@ -116,35 +115,37 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
     public void setCanSlideInIdleScrollState(boolean canSlideInIdleScrollState){
         mCanSlideInIdleScrollState = canSlideInIdleScrollState;
     }
+
+    public void setDelayOffset(int offset) {
+        mDelayOffset = offset;
+    }
     // endregion
 
     // region Logic
-    private int snapView(View view, int diffTotal, int midView, int translation, boolean isFooter) {
-        if (-diffTotal > 0 && -diffTotal < midView) {
+    protected int calculateTranslation(int scrollDiff, int scrollY, int currentTranslation, int minTranslation) {
+        if (scrollDiff < 0) {
+            if (mDelayOffset > 0 && scrollY <= mDelayOffset) {
+                return currentTranslation;
+            }
+            return Math.max(currentTranslation + scrollDiff, minTranslation);
+        } else {
+            return Math.min(Math.max(currentTranslation + scrollDiff, minTranslation), 0);
+        }
+    }
+
+    private int snapView(View view, int currentTranslation, int midView, int scrollY, int minTranslation, boolean isFooter) {
+        minTranslation = (isFooter ? minTranslation : -minTranslation);
+        if ((-currentTranslation > 0 && -currentTranslation < midView) || scrollY <= minTranslation) {
             animateView(view, 0);
             return 0;
-        } else if (-diffTotal < (isFooter ? translation : -translation) && -diffTotal >= midView) {
-            animateView(view, translation);
-            return isFooter ? -translation : translation;
+        } else if (-currentTranslation < minTranslation && -currentTranslation >= midView && scrollY > minTranslation) {
+            animateView(view, isFooter ? minTranslation : -minTranslation);
+            return -minTranslation;
         }
 
-        return diffTotal;
+        return currentTranslation;
     }
 
-    protected int calculateDiffTotal(int diff, int currentDiffTotal, int minTranslation,
-                                   boolean isTwitter, int scrollY) {
-        if (diff < 0) {
-            if (isTwitter) {
-                if (scrollY <= -minTranslation) {
-                    return currentDiffTotal;
-                }
-            }
-            return Math.max(currentDiffTotal + diff, minTranslation);
-        } else {
-            return Math.min(Math.max(currentDiffTotal + diff, minTranslation), 0);
-        }
-    }
-    
     protected void animateView(View view, int translation) {
         ObjectAnimator anim = ObjectAnimator.ofFloat(view, "translationY", view.getTranslationY(), translation);
         anim.setDuration(100);

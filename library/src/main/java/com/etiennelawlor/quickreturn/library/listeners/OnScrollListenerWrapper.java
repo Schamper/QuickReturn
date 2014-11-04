@@ -18,41 +18,48 @@ public abstract class OnScrollListenerWrapper implements AbsListView.OnScrollLis
             new ArrayList<AbsListView.OnScrollListener>();
     private List<NotifyingScrollView.OnScrollChangedListener> mExtraScrollViewOnScrollListenerList =
             new ArrayList<NotifyingScrollView.OnScrollChangedListener>();
-    private int mPrevScrollY = 0;
     private int mLastScrollState = 0;
+    private int mScrollY = 0;
 
-    protected abstract void handleOnScrollChanged(int oldY, int newY);
-    protected abstract void handleOnScrollStateChanged(int scrollState);
+    private QuickReturnUtils mUtils;
+
+    protected abstract void handleOnScrollChanged(int diff, int scrollY);
+    protected abstract void handleOnScrollStateChanged(int scrollState, int scrollY);
 
     @Override
     public void onScrollStateChanged(ScrollView who, int scrollState) {
         fireExtraOnScrollStateChangedListeners(who, scrollState);
-        handleOnScrollStateChanged(scrollState);
+        handleOnScrollStateChanged(scrollState, who.getScrollY());
     }
 
     @Override
     public void onScrollChanged(ScrollView who, int l, int t, int oldl, int oldt) {
         fireExtraOnScrollListeners(who, l, t, oldl, oldt);
-        handleOnScrollChanged(oldt, t);
+        handleOnScrollChanged(oldt - t, t);
     }
 
     @Override
     public void onScrollStateChanged(AbsListView listView, int scrollState) {
         fireExtraOnScrollStateChangedListeners(listView, scrollState);
-        handleOnScrollStateChanged(scrollState);
+
+        handleOnScrollStateChanged(scrollState, mScrollY);
         mLastScrollState = scrollState;
     }
 
     @Override
-    public void onScroll(AbsListView listView, int i, int i2, int i3) {
-        fireExtraOnScrollListeners(listView, i, i2, i3);
-        int scrollY = QuickReturnUtils.getScrollY(listView);
-        // Prevent action when a scroll position is being restored
-        // Pretty hacky method, but it works
-        if (mLastScrollState != SCROLL_STATE_IDLE) {
-            handleOnScrollChanged(mPrevScrollY, scrollY);
+    public void onScroll(AbsListView listView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        fireExtraOnScrollListeners(listView, firstVisibleItem, visibleItemCount, totalItemCount);
+
+        if (mUtils == null) {
+            mUtils = new QuickReturnUtils(listView);
         }
-        mPrevScrollY = scrollY;
+
+        int diff = mUtils.getIncrementalOffset(firstVisibleItem, visibleItemCount);
+        mScrollY -= diff;
+
+        if (mLastScrollState != SCROLL_STATE_IDLE) {
+            handleOnScrollChanged(diff, mScrollY);
+        }
     }
 
     public void registerExtraOnScrollListener(AbsListView.OnScrollListener listener) {
