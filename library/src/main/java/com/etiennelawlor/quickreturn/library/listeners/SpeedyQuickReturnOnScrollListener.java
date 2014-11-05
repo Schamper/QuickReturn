@@ -71,13 +71,21 @@ public class SpeedyQuickReturnOnScrollListener extends QuickReturnOnScrollListen
     }
 
     @Override
-    public boolean isHeaderHidden() {
+    public boolean isHeaderFullyHidden() {
         return mHeader.getVisibility() == View.GONE;
     }
 
     @Override
-    public boolean isFooterHidden() {
+    public boolean isFooterFullyHidden() {
         return mFooter.getVisibility() == View.GONE;
+    }
+
+    public boolean isHeaderFullyVisible() {
+        return mHeader.getVisibility() == View.VISIBLE;
+    }
+
+    public boolean isFooterFullyVisible() {
+        return mHeader.getVisibility() == View.VISIBLE;
     }
 
     @Override
