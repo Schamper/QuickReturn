@@ -33,7 +33,7 @@ public class SpeedyQuickReturnOnScrollListener extends QuickReturnOnScrollListen
         mSlideFooterDownAnimation = AnimationUtils.loadAnimation(context, R.anim.anticipate_slide_footer_down);
     }
 
-    public SpeedyQuickReturnOnScrollListener(Context context, QuickReturnType quickReturnType, ArrayList<View> headerViews, ArrayList<View> footerViews) {
+    public SpeedyQuickReturnOnScrollListener(QuickReturnType quickReturnType, ArrayList<View> headerViews, ArrayList<View> footerViews) {
         super(quickReturnType, null, 0, null, 0);
         mHeaderViews = headerViews;
         mFooterViews = footerViews;

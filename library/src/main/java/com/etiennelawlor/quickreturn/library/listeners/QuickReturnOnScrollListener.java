@@ -168,12 +168,20 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
     // endregion
 
     // region Utility Methods
-    public boolean isHeaderHidden() {
+    public boolean isHeaderFullyHidden() {
         return mCurrentHeaderTranslation == mMinHeaderTranslation;
     }
 
-    public boolean isFooterHidden() {
+    public boolean isFooterFullyHidden() {
         return mCurrentFooterTranslation == mMinFooterTranslation;
+    }
+
+    public boolean isHeaderFullyVisible() {
+        return mCurrentHeaderTranslation == 0;
+    }
+
+    public boolean isFooterFullyVisible() {
+        return mCurrentFooterTranslation == 0;
     }
 
     public void showHeader() {
