@@ -1,8 +1,10 @@
 package com.etiennelawlor.quickreturn.library.listeners;
 
+import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.view.View;
 
+import com.etiennelawlor.quickreturn.library.enums.QuickReturnState;
 import com.etiennelawlor.quickreturn.library.enums.QuickReturnType;
 
 /**
@@ -17,15 +19,17 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
     private int mMinHeaderTranslation;
     private int mMidHeader;
     private int mMidFooter;
+    private ObjectAnimator mAnimator;
     protected View mHeader;
     protected View mFooter;
 
     protected QuickReturnType mQuickReturnType;
+    protected QuickReturnState mQuickReturnState = QuickReturnState.IDLE;
 
     private boolean mCanSlideInIdleScrollState = false;
+    private int mAnimationDuration = 100;
     private int mDelayOffset = 0;
     // endregion
-
 
     // region Constructor
     public QuickReturnOnScrollListener(QuickReturnType quickReturnType, View headerView, int headerTranslation, View footerView, int footerTranslation) {
@@ -44,17 +48,21 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
     // region Handlers
     protected void handleOnScrollChanged(int diff, int scrollY) {
         if (diff != 0) {
+            if (mAnimator != null) {
+                mAnimator.cancel();
+            }
+
             boolean fall = false;
             switch (mQuickReturnType) {
                 case BOTH:
                     fall = true;
                 case HEADER:
                     mCurrentHeaderTranslation = calculateTranslation(diff, scrollY, mCurrentHeaderTranslation, mMinHeaderTranslation);
-                    mHeader.setTranslationY(mCurrentHeaderTranslation);
+                    translateView(mHeader, mCurrentHeaderTranslation, false);
                     if (!fall) break;
                 case FOOTER:
                     mCurrentFooterTranslation = calculateTranslation(diff, scrollY, mCurrentFooterTranslation, -mMinFooterTranslation);
-                    mFooter.setTranslationY(-mCurrentFooterTranslation);
+                    translateView(mFooter, -mCurrentFooterTranslation, false);
                     break;
                 default:
                     break;
@@ -63,7 +71,7 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
     }
 
     protected void handleOnScrollStateChanged(int scrollState, int scrollY) {
-        if (mCanSlideInIdleScrollState && scrollState == SCROLL_STATE_IDLE) {
+        if (mCanSlideInIdleScrollState && scrollState == SCROLL_STATE_IDLE && mQuickReturnState == QuickReturnState.IDLE) {
             boolean fall = false;
             switch (mQuickReturnType) {
                 case BOTH:
@@ -78,46 +86,6 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
                     break;
             }
         }
-    }
-    // endregion
-
-    // region Utility Methods
-    public boolean isHeaderHidden() {
-        return mCurrentHeaderTranslation == mMinHeaderTranslation;
-    }
-
-    public boolean isFooterHidden() {
-        return mCurrentFooterTranslation == mMinFooterTranslation;
-    }
-
-    public void showHeader() {
-        animateView(mHeader, 0);
-        mCurrentHeaderTranslation = 0;
-    }
-
-    public void hideHeader() {
-        animateView(mHeader, mMinHeaderTranslation);
-        mCurrentHeaderTranslation = mMinHeaderTranslation;
-    }
-
-    public void showFooter() {
-        animateView(mFooter, 0);
-        mCurrentFooterTranslation = 0;
-    }
-
-    public void hideFooter() {
-        animateView(mFooter, mMinFooterTranslation);
-        mCurrentFooterTranslation = mMinFooterTranslation;
-    }
-    // endregion
-
-    // region Settings
-    public void setCanSlideInIdleScrollState(boolean canSlideInIdleScrollState){
-        mCanSlideInIdleScrollState = canSlideInIdleScrollState;
-    }
-
-    public void setDelayOffset(int offset) {
-        mDelayOffset = offset;
     }
     // endregion
 
@@ -136,20 +104,112 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
     private int snapView(View view, int currentTranslation, int midView, int scrollY, int minTranslation, boolean isFooter) {
         minTranslation = (isFooter ? minTranslation : -minTranslation);
         if ((-currentTranslation > 0 && -currentTranslation < midView) || scrollY <= minTranslation) {
-            animateView(view, 0);
+            translateView(view, 0, true);
             return 0;
         } else if (-currentTranslation < minTranslation && -currentTranslation >= midView && scrollY > minTranslation) {
-            animateView(view, isFooter ? minTranslation : -minTranslation);
+            translateView(view, isFooter ? minTranslation : -minTranslation, true);
             return -minTranslation;
         }
 
         return currentTranslation;
     }
 
-    protected void animateView(View view, int translation) {
-        ObjectAnimator anim = ObjectAnimator.ofFloat(view, "translationY", view.getTranslationY(), translation);
-        anim.setDuration(100);
-        anim.start();
+    private void translateView(View view, int translation, boolean animate) {
+        if (animate) animateView(view, translation);
+        else view.setTranslationY(translation);
+    }
+
+    protected void animateView(final View view, final int translation) {
+        mAnimator = ObjectAnimator.ofFloat(view, "translationY", view.getTranslationY(), translation);
+        mAnimator.setDuration(1000);
+        mAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+                mQuickReturnState = QuickReturnState.ANIMATING;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                mQuickReturnState = QuickReturnState.IDLE;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+                int currentTranslation = Math.round((Float) mAnimator.getAnimatedValue());
+                // Pointers would be useful now
+                if (view.equals(mHeader)) {
+                    mCurrentHeaderTranslation = currentTranslation;
+                } else {
+                    mCurrentFooterTranslation = currentTranslation;
+                }
+                mAnimator.end();
+                mAnimator = null;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {}
+        });
+        mAnimator.start();
+    }
+    // endregion
+
+    // region Settings
+    public void setCanSlideInIdleScrollState(boolean canSlideInIdleScrollState){
+        mCanSlideInIdleScrollState = canSlideInIdleScrollState;
+    }
+
+    public void setAnimationDuration(int duration) {
+        mAnimationDuration = duration;
+    }
+
+    public void setDelayOffset(int offset) {
+        mDelayOffset = offset;
+    }
+    // endregion
+
+    // region Utility Methods
+    public boolean isHeaderHidden() {
+        return mCurrentHeaderTranslation == mMinHeaderTranslation;
+    }
+
+    public boolean isFooterHidden() {
+        return mCurrentFooterTranslation == mMinFooterTranslation;
+    }
+
+    public void showHeader() {
+        showHeader(false);
+    }
+
+    public void showHeader(boolean animate) {
+        translateView(mHeader, 0, animate);
+        mCurrentHeaderTranslation = 0;
+    }
+
+    public void hideHeader() {
+        hideHeader(false);
+    }
+
+    public void hideHeader(boolean animate) {
+        translateView(mHeader, mMinHeaderTranslation, animate);
+        mCurrentHeaderTranslation = mMinHeaderTranslation;
+    }
+
+    public void showFooter() {
+        showFooter(false);
+    }
+
+    public void showFooter(boolean animate) {
+        translateView(mFooter, 0, animate);
+        mCurrentFooterTranslation = 0;
+    }
+
+    public void hideFooter() {
+        hideFooter(false);
+    }
+
+    public void hideFooter(boolean animate) {
+        translateView(mFooter, mMinFooterTranslation, animate);
+        mCurrentFooterTranslation = mMinFooterTranslation;
     }
     // endregion
 }
