@@ -121,7 +121,7 @@ public class QuickReturnOnScrollListener extends OnScrollListenerWrapper {
 
     protected void animateView(final View view, final int translation) {
         mAnimator = ObjectAnimator.ofFloat(view, "translationY", view.getTranslationY(), translation);
-        mAnimator.setDuration(1000);
+        mAnimator.setDuration(mAnimationDuration);
         mAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animator) {
